@@ -6,11 +6,11 @@ use Carp;
 use Search::Xapian ':db';
 __PACKAGE__->mk_ro_accessors(qw( xdb ));
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
-SWISH::Prog::Xapian::Indexer - Swish3 Xapian backend
+SWISH::Prog::Xapian::InvIndex - Swish3 Xapian backend InvIndex
 
 =head1 SYNOPSIS
 
@@ -19,6 +19,9 @@ SWISH::Prog::Xapian::Indexer - Swish3 Xapian backend
 =cut
 
 =head1 METHODS
+
+Only new and overridden methods are documented here. See
+the L<SWISH::Prog::InvIndex> documentation.
 
 =head2 open
 
@@ -105,6 +108,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * Mailing list
+
+L<http://lists.swish-e.org/listinfo/users>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 

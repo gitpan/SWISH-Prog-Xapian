@@ -2,7 +2,7 @@ package SWISH::Prog::Xapian;
 use warnings;
 use strict;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -33,10 +33,47 @@ SWISH::Prog::Xapian - Swish3 Xapian backend
 
 =head1 DESCRIPTION
 
+B<STOP>: Read the L<SWISH::Prog> documentation before you use this
+module.
+
 SWISH::Prog::Xapian is a Xapian-based implementation of Swish3,
 using the SWISH::3 bindings for libswish3.
 
 See the Swish3 development site at http://dev.swish-e.org/wiki/swish3
+
+=head1 Why Not Use Search::Xapian Directly?
+
+You can use Search::Xapian directly. Using Search::Xapian via SWISH::Prog::Xapian
+offers a few advantages:
+
+=over
+
+=item Aggregators and Filters
+
+You get to use all of SWISH::Prog's Aggregators and SWISH::Filter support.
+So you can easily index all kinds of file formats 
+(email, .txt, .html, .xml, .pdf, .doc, .xls, etc) 
+without writing your own parser.
+
+=item SWISH::3
+
+SWISH::3 offers fast and robust XML and HTML parsers 
+with an extensible configuration system, build on top of libxml2.
+
+=item Simple now, complex later
+
+You can index your content with SWISH::Prog::Xapian,
+then build a more complex searching application directly
+with Search::Xapian.
+
+=item Compatibility with swish_xapian
+
+The C<swish_xapian> tool that comes as part of libswish3 should
+generate compatible indexes. So you can create indexes with
+SWISH::Prog::Xapian::Indexer and search them with C<swish_xapian>
+and vice versa.
+
+=back
 
 =head1 AUTHOR
 
@@ -59,6 +96,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * Mailing list
+
+L<http://lists.swish-e.org/listinfo/users>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
@@ -84,6 +125,10 @@ Copyright 2009 Peter Karman, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<SWISH::Prog>, L<Search::Xapian>
 
 =cut
 

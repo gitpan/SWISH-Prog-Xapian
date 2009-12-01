@@ -1,5 +1,9 @@
 Revision history for SWISH-Prog-Xapian
 
-0.01    xxx
+0.01    24 Nov 2009
         First version, released on an unsuspecting world.
+
+0.02    1 Dec 2009
+        * fixes to POD
+
 

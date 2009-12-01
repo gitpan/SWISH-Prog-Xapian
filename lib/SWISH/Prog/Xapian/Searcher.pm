@@ -4,13 +4,12 @@ use warnings;
 use base qw( SWISH::Prog::Searcher );
 use Carp;
 use SWISH::Prog::Xapian::Results;
-use SWISH::Prog::Xapian::InvIndex;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
-SWISH::Prog::Xapian::Searcher - search Swish3 Xapian backend
+SWISH::Prog::Xapian::Searcher - Swish3 Xapian backend Searcher
 
 =head1 SYNOPSIS
 
@@ -18,7 +17,20 @@ SWISH::Prog::Xapian::Searcher - search Swish3 Xapian backend
  
 =cut
 
+=head1 DESCRIPTION
+
+SWISH::Prog::Xapian::Searcher is not made to replace the more fully-featured
+Search::Xapian. Instead, SWISH::Prog::Xapian::Searcher
+provides a simple API similar to other SWISH::Prog::Searcher-based backends
+so that you can experiment with alternate
+storage engines without needing to change much code.
+When your search application requirements become more complex, the author
+recommends the switch to using Search::Xapian directly.
+
 =head1 METHODS
+
+Only new and overridden methods are documented here. See
+the L<SWISH::Prog::Searcher> documentation.
 
 =cut
 
@@ -98,6 +110,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * Mailing list
+
+L<http://lists.swish-e.org/listinfo/users>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
