@@ -4,7 +4,7 @@ use warnings;
 use base qw( SWISH::Prog::Result );
 use SWISH::3 ':constants';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 NAME
 

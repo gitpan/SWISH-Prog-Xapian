@@ -6,11 +6,11 @@ use Carp;
 use SWISH::Prog::Xapian::InvIndex;
 use Search::Xapian::Document;
 use Search::Xapian::TermGenerator;
-use SWISH::3 qw(:constants);
+use SWISH::3 qw( :constants );
 use Scalar::Util qw( blessed );
 use Data::Dump qw( dump );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 NAME
 
@@ -35,10 +35,6 @@ sub init {
     my $self = shift;
     $self->SUPER::init(@_);
 
-    # default config
-    $self->{config} ||= SWISH::Prog::Config->new;
-
-    # default index
     $self->{invindex} ||= SWISH::Prog::Xapian::InvIndex->new;
 
     if ( $self->{invindex} && !blessed( $self->{invindex} ) ) {
@@ -53,13 +49,31 @@ sub init {
 
     $self->{flush} ||= 100000;
 
-    # TODO XML-ify $self->{config} and pass in to parser too.
-    $self->{parser} = SWISH::3->new( handler => sub { $self->_handler(@_) } );
+    # config resolution order
+    # 1. default config via SWISH::3->new
 
-    $self->{parser}->analyzer->set_tokenize(0);
+    # TODO can pass s3 in?
+    $self->{s3} ||= SWISH::3->new(
+        handler => sub {
+            $self->_handler(@_);
+        }
+    );
 
-    # so Headers uses correct version
-    $ENV{SWISH3} = 1;
+    # 2. any existing header file.
+    my $swish_3_index = $self->invindex->path->file( SWISH_HEADER_FILE() );
+    if ( -r $swish_3_index ) {
+        $self->{s3}->config->read("$swish_3_index");
+    }
+
+    # 3. via 'config' param passed to this method
+    if ( exists $self->{config} ) {
+
+        # this utility method defined in base SWISH::Prog::Indexer class.
+        $self->_verify_swish3_config();
+    }
+
+    # 4. always turn off tokenizer, preferring Xapian do it
+    $self->{s3}->analyzer->set_tokenize(0);
 
     return $self;
 
@@ -232,7 +246,7 @@ sub _handler {
 sub process {
     my $self = shift;
     my $sdoc = $self->SUPER::process(@_);
-    $self->{parser}->parse_buffer("$sdoc");
+    $self->{s3}->parse_buffer("$sdoc");
     if ( $self->count > $self->flush ) {
         $self->invindex->xdb->flush;
     }
@@ -275,8 +289,7 @@ sub _delete {
 
 =head2 finish
 
-Calls SUPER::finish() and sets the internal SWISH::3 parser object to undef
-in order to avoid spurious memory warnings during Perl's garbage collection.
+Write the index header and flush the index.
 
 =cut
 
@@ -284,16 +297,16 @@ sub finish {
     my $self = shift;
 
     # write header
-    my $index = $self->{parser}->config->get_index;
+    my $index = $self->{s3}->config->get_index;
 
     $index->set( 'Format', 'Xapian' );
 
-    #$self->{parser}->config->set_index($index);
+    #$self->{s3}->config->set_index($index);
 
-    $self->{parser}->config->write(
+    $self->{s3}->config->write(
         $self->invindex->path->file( SWISH_HEADER_FILE() )->stringify );
 
-    $self->{parser} = undef;    # just to avoid mem leak warnings
+    $self->{s3} = undef;    # just to avoid mem leak warnings
 
     $self->SUPER::finish(@_);
 }

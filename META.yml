@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               SWISH-Prog-Xapian
-version:            0.02
+version:            0.03
 abstract:           Swish3 Xapian backend
 author:
     - Peter Karman <karman at cpan dot org>
@@ -14,7 +14,7 @@ requires:
     perl:            5.008003
     Search::Xapian:  0
     SWISH::3:        0.01
-    SWISH::Prog:     0.29
+    SWISH::Prog:     0.32
     Test::More:      0
 resources:
     bugtracker:  http://rt.cpan.org/NoAuth/Bugs.html?Dist=SWISH-Prog-Xapian

@@ -1,9 +1,13 @@
 Revision history for SWISH-Prog-Xapian
 
 0.01    24 Nov 2009
-        First version, released on an unsuspecting world.
+    * First version, released on an unsuspecting world.
 
 0.02    1 Dec 2009
-        * fixes to POD
+    * fixes to POD
 
+0.03    12 Dec 2009
+    * support SWISH::3::Config format internally.
+      Can now read Swish-e 2.4.x config files and apply
+      them to Swish3 format.
 

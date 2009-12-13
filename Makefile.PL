@@ -19,7 +19,7 @@ WriteMakefile(
     PREREQ_PM     => {
         'Test::More'     => 0,
         'Search::Xapian' => 0,
-        'SWISH::Prog'    => 0.29,
+        'SWISH::Prog'    => 0.32,   # SWISH::3::Config support
         'SWISH::3'       => 0.01,
     },
     dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
