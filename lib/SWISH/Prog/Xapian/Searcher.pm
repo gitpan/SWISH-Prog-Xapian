@@ -5,7 +5,7 @@ use base qw( SWISH::Prog::Searcher );
 use Carp;
 use SWISH::Prog::Xapian::Results;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ The ending position. Default is max_hits().
 
 =item order
 
-The sort order. Default is by rank.
+The sort order. Default is by score.
 B<This feature is not yet supported.>
 
 =back
@@ -68,13 +68,18 @@ sub search {
 
     my $start = $opts->{start} || 0;
     my $max   = $opts->{max}   || $self->max_hits;
-    my $order = $opts->{order} || 'rank';
+    my $order = $opts->{order} || 'score';
 
     #warn Data::Dump::dump $self;
 
-    my $enq = $self->{invindex}->{xdb}->enquire($query);
-    if ( $order ne 'rank' ) {
-        croak "sort order by anything other than rank is not yet supported";
+    # we enquire on one db but can span multiple.
+    my $db1 = $self->{invindex}->[0]->{xdb};
+    for my $xdb ( map { $_->{xdb} } ( @{ $self->{invindex} } )[ 1 .. -1 ] ) {
+        $db1->add_database($xdb);
+    }
+    my $enq = $db1->enquire($query);
+    if ( $order ne 'score' ) {
+        croak "sort order by anything other than score is not yet supported";
     }
     my $mset = $enq->get_mset( $start, $max );
     my $results = SWISH::Prog::Xapian::Results->new(

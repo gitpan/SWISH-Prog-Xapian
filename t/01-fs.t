@@ -32,10 +32,8 @@ ok( $program->index('t/'), "run program" );
 
 is( $program->count, 2, "indexed test docs" );
 
-ok( my $searcher = SWISH::Prog::Xapian::Searcher->new(
-        invindex => 't/index.swish',
-        config   => 't/test.conf',
-    ),
+ok( my $searcher
+        = SWISH::Prog::Xapian::Searcher->new( invindex => 't/index.swish', ),
     "new searcher"
 );
 

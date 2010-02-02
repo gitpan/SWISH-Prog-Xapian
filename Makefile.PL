@@ -19,8 +19,8 @@ WriteMakefile(
     PREREQ_PM     => {
         'Test::More'     => 0,
         'Search::Xapian' => 0,
-        'SWISH::Prog'    => 0.32,   # SWISH::3::Config support
-        'SWISH::3'       => 0.01,
+        'SWISH::Prog'    => 0.37,   # SWISH::3::Config support
+        'SWISH::3'       => 0.05,
     },
     dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'SWISH-Prog-Xapian-* t/index.swish' },

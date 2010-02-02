@@ -11,3 +11,8 @@ Revision history for SWISH-Prog-Xapian
       Can now read Swish-e 2.4.x config files and apply
       them to Swish3 format.
 
+0.04    02 Feb 2010
+    * changes to support SWISH::Prog 0.37:
+        * no more config() for Searcher
+        * Searcher supports multiple InvIndex dbs
+
