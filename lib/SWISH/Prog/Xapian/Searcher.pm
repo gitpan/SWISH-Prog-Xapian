@@ -5,7 +5,7 @@ use base qw( SWISH::Prog::Searcher );
 use Carp;
 use SWISH::Prog::Xapian::Results;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 

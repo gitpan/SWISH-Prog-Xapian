@@ -6,7 +6,7 @@ use SWISH::Prog::Xapian::Result;
 
 __PACKAGE__->mk_ro_accessors(qw( mset ));
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 

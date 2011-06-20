@@ -16,3 +16,5 @@ Revision history for SWISH-Prog-Xapian
         * no more config() for Searcher
         * Searcher supports multiple InvIndex dbs
 
+0.05    19 June 2011
+    * bump SWISH::3 dependency to 0.09
