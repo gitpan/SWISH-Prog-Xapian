@@ -18,3 +18,9 @@ Revision history for SWISH-Prog-Xapian
 
 0.05    19 June 2011
     * bump SWISH::3 dependency to 0.09
+
+0.06    22 Oct 2011
+    * add prop_id_map() so that Searcher can return any PropertyName
+      in results
+    * fix some failing tests
+    * bump dependencies

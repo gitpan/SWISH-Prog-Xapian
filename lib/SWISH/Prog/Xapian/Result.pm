@@ -3,8 +3,11 @@ use strict;
 use warnings;
 use base qw( SWISH::Prog::Result );
 use SWISH::3 ':constants';
+use Carp;
 
-our $VERSION = '0.05';
+__PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
+
+our $VERSION = '0.06';
 
 =head1 NAME
 
@@ -23,6 +26,10 @@ the L<SWISH::Prog::Result> documentation.
 
 =cut
 
+=head2 prop_id_map 
+
+Get the read-only internal map for PropertyNames to id values.
+
 =head2 uri
 
 Returns the uri (unique term) for the result document.
@@ -38,6 +45,24 @@ Returns the title of the result document.
 =cut
 
 sub title { $_[0]->{doc}->get_value( SWISH_DOC_FIELDS_MAP()->{title} ) }
+
+=head2 get_property(I<name>)
+
+Returns value for PropertyName I<name>.
+
+=cut
+
+sub get_property {
+    my $self = shift;
+    my $name = shift;
+    if ( !defined $name ) {
+        croak "name required";
+    }
+    if ( !exists $self->{prop_id_map}->{$name} ) {
+        croak "unrecognized PropertyName: $name";
+    }
+    return $self->{doc}->get_value( $self->{prop_id_map}->{$name} );
+}
 
 1;
 

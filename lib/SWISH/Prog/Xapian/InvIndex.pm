@@ -6,7 +6,7 @@ use Carp;
 use Search::Xapian ':db';
 __PACKAGE__->mk_ro_accessors(qw( xdb ));
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 NAME
 
@@ -37,6 +37,8 @@ sub open {
         $self->clobber ? DB_CREATE_OR_OVERWRITE : DB_CREATE_OR_OPEN )
         or croak "can't create Xapian WritableDatabase $self: $!";
     $self->{xdb}->begin_transaction();
+
+    #warn "xdb open for $self->{xdb}";
 }
 
 =head2 open_ro
@@ -49,6 +51,8 @@ sub open_ro {
     my $self = shift;
     $self->{xdb} = Search::Xapian::Database->new("$self")
         or croak "can't open Xapian Database $self: $!";
+
+    #warn "xdb open_ro for $self->{xdb}";
 }
 
 =head2 close
@@ -61,20 +65,9 @@ sub close {
     my $self = shift;
     $self->{xdb}->commit_transaction()
         if $self->{xdb}->can('commit_transaction');
-}
+    $self->{xdb}->close() if $self->{xdb}->can('close');
 
-=head2 meta
-
-TODO
-
-Returns the SWISH::3::Config object for the invindex.
-
-=cut
-
-sub meta {
-
-    croak "TODO";
-
+    #warn "xdb close for $self->{xdb}";
 }
 
 =head2 xdb

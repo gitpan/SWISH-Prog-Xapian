@@ -10,7 +10,7 @@ use SWISH::3 qw( :constants );
 use Scalar::Util qw( blessed );
 use Data::Dump qw( dump );
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 NAME
 
@@ -266,6 +266,7 @@ sub _add_or_update {
 
 sub _add {
     my ( $self, $xdoc, $uri ) = @_;
+    $self->debug and carp "add document $uri";
     return $self->invindex->xdb->add_document($xdoc);
 }
 
@@ -273,7 +274,7 @@ sub _update {
     my ( $self, $xdoc, $uri ) = @_;
     my $doc_id = $self->invindex->xdb->postlist_begin($uri)
         or croak "no such doc in index $self->{invindex}: $uri";
-
+    $self->debug and carp "update document $uri";
     $self->invindex->xdb->replace_document( $doc_id, $xdoc );
     return $doc_id;
 }

@@ -4,8 +4,11 @@ use warnings;
 use base qw( SWISH::Prog::Searcher );
 use Carp;
 use SWISH::Prog::Xapian::Results;
+use SWISH::3 ':constants';
 
-our $VERSION = '0.05';
+__PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
+
+our $VERSION = '0.06';
 
 =head1 NAME
 
@@ -33,6 +36,49 @@ Only new and overridden methods are documented here. See
 the L<SWISH::Prog::Searcher> documentation.
 
 =cut
+
+=head2 init( I<params> )
+
+Overrides superclass to build map of PropertyNames to ids, since
+Xapian stores values by id not name.
+
+=cut
+
+sub init {
+    my $self = shift;
+    $self->SUPER::init(@_);
+    $self->{prop_id_map} = $self->_build_prop_id_map();
+    return $self;
+}
+
+sub _build_prop_id_map {
+    my $self = shift;
+
+    # load meta from the first invindex
+    my $invindex = $self->invindex->[0];
+    my $config   = $invindex->meta;
+    my $props    = $config->PropertyNames;
+
+    # initialize with built-ins
+    my %map    = ();
+    my %fields = %{ SWISH_DOC_FIELDS_MAP() };
+    my %props  = %{ SWISH_DOC_PROP_MAP() };
+    for my $p ( keys %props ) {
+        my $field = $props{$p};
+        my $id    = $fields{$field};
+        $map{$p} = $id;
+    }
+
+    # add custom defined
+    for my $name ( keys %$props ) {
+        $map{$name} = $props->{$name}->{id};
+    }
+    return \%map;
+}
+
+=head2 prop_id_map 
+
+Get the read-only internal map for PropertyNames to id values.
 
 =head2 search( I<query> [, I<opts> ] )
 
@@ -83,8 +129,9 @@ sub search {
     }
     my $mset = $enq->get_mset( $start, $max );
     my $results = SWISH::Prog::Xapian::Results->new(
-        hits => $mset->size(),
-        mset => $mset,
+        hits         => $mset->size(),
+        mset         => $mset,
+        prop_id_map => $self->{_prop_id_map},
     );
     $results->{_i} = 0;
     return $results;
