@@ -7,7 +7,7 @@ use Carp;
 
 __PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 NAME
 

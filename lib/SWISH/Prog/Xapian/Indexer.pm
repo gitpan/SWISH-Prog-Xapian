@@ -9,8 +9,9 @@ use Search::Xapian::TermGenerator;
 use SWISH::3 qw( :constants );
 use Scalar::Util qw( blessed );
 use Data::Dump qw( dump );
+use Path::Class::File::Lockable;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 NAME
 
@@ -62,7 +63,7 @@ sub init {
     # 2. any existing header file.
     my $swish_3_index = $self->invindex->path->file( SWISH_HEADER_FILE() );
     if ( -r $swish_3_index ) {
-        $self->{s3}->config->read("$swish_3_index");
+        $self->{s3}->config->add("$swish_3_index");
     }
 
     # 3. via 'config' param passed to this method
@@ -74,6 +75,13 @@ sub init {
 
     # 4. always turn off tokenizer, preferring Xapian do it
     $self->{s3}->analyzer->set_tokenize(0);
+
+    my $config = $self->{s3}->config;
+    my $lang   = $config->get_index->get( SWISH_INDEX_STEMMER_LANG() )
+        || 'none';
+    $self->{_lang} = $lang;    # cache for finish()
+
+    # TODO apply stemming
 
     return $self;
 
@@ -294,20 +302,54 @@ Write the index header and flush the index.
 
 =cut
 
+my @chars = ( 'a' .. 'z', 'A' .. 'Z', 0 .. 9 );
+
 sub finish {
     my $self = shift;
+
+    return 0 if $self->{_is_finished};
+
+    # get a lock on our header file till
+    # this entire transaction is complete.
+    # Note that we trust the Lucy locking feature
+    # to have prevented any other process
+    # from getting a lock on the invindex itself,
+    # but we want to make sure nothing interrupts
+    # us from writing our own header after calling ->commit().
+    my $xdb       = $self->invindex->xdb;
+    my $invindex  = $self->invindex->path;
+    my $header    = $invindex->file( SWISH_HEADER_FILE() )->stringify;
+    my $lock_file = Path::Class::File::Lockable->new($header);
+    if ( $lock_file->locked ) {
+        croak "Lock file found on $header -- cannot commit indexing changes";
+    }
+    $lock_file->lock;
 
     # write header
     my $index = $self->{s3}->config->get_index;
 
-    $index->set( 'Format', 'Xapian' );
+    my $doc_count = $xdb->get_doccount();
+
+    # poor man's uuid
+    my $uuid = join( "", @chars[ map { rand @chars } ( 1 .. 24 ) ] );
+
+    $index->set( SWISH_INDEX_NAME(),         "$invindex" );
+    $index->set( SWISH_INDEX_FORMAT(),       'Xapian' );
+    $index->set( SWISH_INDEX_STEMMER_LANG(), $self->{_lang} );
+    $index->set( "DocCount",                 $doc_count );
 
     #$self->{s3}->config->set_index($index);
 
-    $self->{s3}->config->write(
-        $self->invindex->path->file( SWISH_HEADER_FILE() )->stringify );
+    $self->{s3}->config->write($header);
+
+    # transaction complete
+    $lock_file->unlock;
+
+    $self->debug and carp "wrote $header with $uuid";
 
     $self->{s3} = undef;    # just to avoid mem leak warnings
+
+    $self->{_is_finished} = 1;
 
     $self->SUPER::finish(@_);
 }

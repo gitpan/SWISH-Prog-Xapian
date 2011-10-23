@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               SWISH-Prog-Xapian
-version:            0.06
+version:            0.07
 abstract:           Swish3 Xapian backend
 author:
     - Peter Karman <karman at cpan dot org>
