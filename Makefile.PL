@@ -20,7 +20,7 @@ WriteMakefile(
         'Test::More'     => 0,
         'Search::Xapian' => 0,
         'SWISH::Prog'    => 0.54, 
-        'SWISH::3'       => 1.000000,
+        'SWISH::3'       => 1.000001,
     },
     dist => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'SWISH-Prog-Xapian-* t/index.swish' },

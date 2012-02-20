@@ -3,12 +3,15 @@ use strict;
 use warnings;
 use base qw( SWISH::Prog::Searcher );
 use Carp;
+use Sort::SQL;
 use SWISH::Prog::Xapian::Results;
+use Search::Xapian::MultiValueSorter;
 use SWISH::3 ':constants';
+use Search::Query;
 
 __PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 NAME
 
@@ -102,6 +105,16 @@ The ending position. Default is max_hits().
 The sort order. Default is by score.
 B<This feature is not yet supported.>
 
+=item get_facets
+
+If set to an array ref of field names, then the Results object
+will contain a hash ref of facet counts for those fields.
+
+=item facet_sample
+
+How many results to examine when counting facets. Default is all
+of them.
+
 =back
 
 =cut
@@ -112,9 +125,11 @@ sub search {
     croak "query required" unless defined $query;
     my $opts = shift || {};
 
-    my $start = $opts->{start} || 0;
-    my $max   = $opts->{max}   || $self->max_hits;
-    my $order = $opts->{order} || 'score';
+    my $start        = $opts->{start}        || 0;
+    my $max          = $opts->{max}          || $self->max_hits;
+    my $order        = $opts->{order}        || 'score';
+    my $get_facets   = $opts->{get_facets}   || 0;
+    my $facet_sample = $opts->{facet_sample} || 0;
 
     #warn Data::Dump::dump $self;
 
@@ -123,15 +138,67 @@ sub search {
     for my $xdb ( map { $_->{xdb} } ( @{ $self->{invindex} } )[ 1 .. -1 ] ) {
         $db1->add_database($xdb);
     }
-    my $enq = $db1->enquire($query);
-    if ( $order ne 'score' ) {
-        croak "sort order by anything other than score is not yet supported";
+    my $parsed_query = Search::Query->parser->parse($query);
+    my $enq          = $db1->enquire($query);
+
+    # sorting
+    if ($order) {
+        if ( ref $order ) {
+
+            # assume it is a MultiValueSorter object
+            $enq->set_sort_by_key( $order, 1 );
+        }
+        else {
+
+            my $sorter     = Search::Xapian::MultiValueSorter->new();
+            my $pmap       = $self->{prop_id_map};
+            my $sort_array = Sort::SQL->parse($order);
+            my @rules;
+            for my $pair (@$sort_array) {
+                my ( $field, $dir ) = @$pair;
+                next if $field eq 'score';
+                my $prop_id = $pmap->{$field};
+                if ( !defined $prop_id ) {
+                    croak "Invalid PropertyName in sort: $field";
+                }
+                $sorter->add( $prop_id, ( uc($dir) eq 'ASC' ? 0 : 1 ) );
+            }
+            $enq->set_sort_by_key( $sorter, 1 );
+        }
     }
-    my $mset = $enq->get_mset( $start, $max );
+
+    my $mset;
+    my %facets;
+    if ($get_facets) {
+        my $pmap = $self->{prop_id_map};
+        my $i    = 0;
+        $mset = $enq->get_mset(
+            $start, $max,
+            sub {
+
+                my ($doc) = @_;
+                return $doc if $facet_sample and $facet_sample > ++$i;
+
+                for my $facet (@$get_facets) {
+                    for my $value (
+                        split( /\003/, $doc->get_value( $pmap->{$facet} ) ) )
+                    {
+                        $facets{$facet}->{$value}++;
+                    }
+                }
+                return $doc;
+            }
+        );
+    }
+    else {
+        $mset = $enq->get_mset( $start, $max );
+    }
     my $results = SWISH::Prog::Xapian::Results->new(
-        hits         => $mset->size(),
-        mset         => $mset,
-        prop_id_map => $self->{_prop_id_map},
+        hits        => $mset->size(),
+        mset        => $mset,
+        query       => $parsed_query,
+        prop_id_map => $self->{prop_id_map},
+        facets      => \%facets,
     );
     $results->{_i} = 0;
     return $results;

@@ -4,9 +4,9 @@ use warnings;
 use base qw( SWISH::Prog::Results );
 use SWISH::Prog::Xapian::Result;
 
-__PACKAGE__->mk_ro_accessors(qw( mset prop_id_map ));
+__PACKAGE__->mk_ro_accessors(qw( mset prop_id_map query facets ));
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 NAME
 
@@ -34,6 +34,15 @@ accessor method.
 
 Get the read-only internal map for PropertyNames to id values.
 
+=head2 query
+
+Get the Search::Query object representing the original query string.
+
+=head2 facets
+
+If C<get_facets> was defined in Searcher->search, returns hash ref
+of facet values and counts.
+
 =head2 next
 
 Returns the next SWISH::Prog::Xapian::Result from the Results iterator.
@@ -47,8 +56,8 @@ sub next {
     my $mit = $self->{mset}->get_msetiterator($i);
     return SWISH::Prog::Xapian::Result->new(
         prop_id_map => $self->{prop_id_map},
-        doc          => $mit->get_document(),
-        score        => $mit->get_percent() * 10,    # scale to 1000
+        doc         => $mit->get_document(),
+        score       => $mit->get_percent() * 10,    # scale to 1000
     );
 }
 

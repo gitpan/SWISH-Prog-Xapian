@@ -7,7 +7,9 @@ use Carp;
 
 __PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
+
+my $field_map = SWISH_DOC_FIELDS_MAP();
 
 =head1 NAME
 
@@ -36,7 +38,7 @@ Returns the uri (unique term) for the result document.
 
 =cut
 
-sub uri { $_[0]->{doc}->get_value( SWISH_DOC_FIELDS_MAP()->{uri} ) }
+sub uri { $_[0]->{doc}->get_value( $field_map->{uri} ) }
 
 =head2 title
 
@@ -44,7 +46,27 @@ Returns the title of the result document.
 
 =cut
 
-sub title { $_[0]->{doc}->get_value( SWISH_DOC_FIELDS_MAP()->{title} ) }
+sub title { $_[0]->{doc}->get_value( $field_map->{title} ) }
+
+=head2 mtime
+
+Returns the last modified time of the result document.
+
+=cut
+
+sub mtime {
+    $_[0]->{doc}->get_value( $field_map->{mtime} );
+}
+
+=head2 summary
+
+Returns body of the result document.
+
+=cut
+
+sub summary {
+    $_[0]->{doc}->get_value( $field_map->{description} );
+}
 
 =head2 get_property(I<name>)
 
@@ -59,6 +81,7 @@ sub get_property {
         croak "name required";
     }
     if ( !exists $self->{prop_id_map}->{$name} ) {
+        warn "prop_id_map: " . Data::Dump::dump( $self->{prop_id_map} );
         croak "unrecognized PropertyName: $name";
     }
     return $self->{doc}->get_value( $self->{prop_id_map}->{$name} );
