@@ -6,7 +6,7 @@ use SWISH::Prog::Xapian::Result;
 
 __PACKAGE__->mk_ro_accessors(qw( mset prop_id_map query facets ));
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 

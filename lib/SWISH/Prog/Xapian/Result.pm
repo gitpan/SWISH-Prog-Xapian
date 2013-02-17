@@ -7,7 +7,7 @@ use Carp;
 
 __PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 my $field_map = SWISH_DOC_FIELDS_MAP();
 

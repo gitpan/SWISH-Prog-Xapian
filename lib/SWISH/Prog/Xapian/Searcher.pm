@@ -11,7 +11,7 @@ use Search::Query;
 
 __PACKAGE__->mk_ro_accessors(qw( prop_id_map ));
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 

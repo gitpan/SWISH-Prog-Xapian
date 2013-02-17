@@ -16,4 +16,5 @@ t/pod.t
 t/test.conf
 t/test.html
 t/test.xml
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
